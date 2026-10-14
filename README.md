@@ -5,4 +5,4 @@
 - Eine einzige Datei (`index.html`), läuft offline und ohne Anmeldung.
 - Teilnehmerzahl → automatische Gruppeneinteilung, Filter nach Stufe/Einheit/Thema, Stundenvorschlag, Merkliste, Video-Links.
 
-Live: https://charlsn44.github.io/fussball/
+Live: https://charlsn44.github.io/Fussball/

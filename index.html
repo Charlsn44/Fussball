@@ -170,6 +170,7 @@ function renderFav(){
 var GP={fo:'',ort:'P',dauer:100,seed:1,skip:{},lock:{}};
 try{var g0=JSON.parse(ls('fb_gen')||'null'); if(g0){GP.fo=g0.fo||'';GP.ort=g0.ort||'P';GP.dauer=g0.dauer||100;}}catch(e){}
 var GENERIC={EIG:1,LIMP:1,MP07:1,MS16:1,DFBK:1,HAAS:1,MSK:1};
+var KIDS={D8:1,D9:1,D3:1,S10:1,A15:1};
 var PHASES={100:[['Aufwärmen',15,'W'],['Übungsform 1 – Grundform',20,'T'],['Übungsform 2 – mit Gegner',20,'G'],['Zielspiel',35,'S'],['Ausklang',10,'A']],
             50:[['Aufwärmen',10,'W'],['Übungsform mit Gegner',15,'G'],['Zielspiel',20,'S'],['Ausklang',5,'A']]};
 var ORDER={100:[3,2,1,0,4],50:[2,1,0,3]};
@@ -178,7 +179,7 @@ function rng(s){return function(){s=(s*9301+49297)%233280;return s/233280}}
 function hasF(u,f){return u.mf.indexOf(f)>=0}
 function score(u,ph,fo,chosen,R){
  var role=ph[2], m=u, sc=0, why=[];
- var ALT={T:{G:-1.5},G:{S:-1.5,T:-2},S:{G:-2},W:{},A:{}}, pen=0;
+ var ALT={T:{G:-1.5},G:{S:-1.5},S:{},W:{},A:{S:-0.5}}, pen=0;
  if(m.mr.indexOf(role)<0){ var ok=Object.keys(ALT[role]).filter(function(k){return m.mr.indexOf(k)>=0}); if(!ok.length) return null; pen=ALT[role][ok[0]]; }
  sc+=pen;
  if(GP.ort==='H'&&m.mv==='P') return null; if(GP.ort==='P'&&m.mv==='H') return null;
@@ -196,6 +197,11 @@ function score(u,ph,fo,chosen,R){
  var src=chosen.filter(function(c){return c.q.some(function(k){return !GENERIC[k]&&u.q.indexOf(k)>=0})});
  if(src.length){sc+=3.5;why.push('gleiche Lehrreihe wie '+src[0].id)}
  if(role==='W'&&m.mi===3) sc-=2; if(role==='A'&&m.mi===3) sc-=3.5; if(role==='A'&&hasF(m,'KO')) sc-=3;
+ var rel=fo?[fo].concat(D.vw[fo]||[]):[]; var foRel=!fo||rel.some(function(r){return hasF(m,r)});
+ if(role==='S'){ if(fo&&fo!=='SP'&&!foRel) sc-=6; if(u.g!==0) sc-=2; }
+ if(role==='G'&&fo&&fo!=='SP'&&!foRel) sc-=5;
+ if(role==='A'){ if(m.mr.indexOf('A')<0) sc-=2.5; if(u.mn>=12) sc-=2; if(m.mi===3) sc-=1; if(hasF(m,'KS')&&fo!=='KS') return null; if(KIDS[u.id]) sc-=4; if(hasF(m,'SP')) sc+=1.5; else if(fo&&!foRel) sc-=3; }
+ if(role==='W'&&KIDS[u.id]&&st.stufe!=='E') sc-=1.5;
  if(role==='T'&&m.mi===1) sc+=0.5; if(role==='S'&&u.g===0) sc+=0.5;
  if(role==='S'&&st.n<8&&u.mn>=8) return null;
  sc+=R()*1.6;
@@ -214,6 +220,7 @@ function generate(){
 }
 function faden(res){
  var ph=PHASES[GP.dauer], fo=GP.fo, s=[];
+ if(GP.ort==='H'&&(fo==='FK'||fo==='FL')) s.push('Hinweis: „'+FNAME[fo]+'“ ist in der Halle nur eingeschränkt sinnvoll (wenig Raum, Deckenhöhe) – wenn möglich auf den Platz ausweichen. ');
 if(fo==='KO') s.push('Kopfball: nach DFB-Empfehlung höchstens zwei Kopfball-Formen pro Stunde, leichte Bälle, wenige Wiederholungen – die übrigen Phasen sind bewusst kopfballfrei. ');
  if(!fo) return 'Kein Schwerpunkt gewählt – die Stunde mischt passende Formen. Wähle einen Schwerpunkt oder eine Einheit für einen roten Faden.';
  s.push('Roter Faden „'+FNAME[fo]+'“: ');
